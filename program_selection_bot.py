@@ -1,7 +1,11 @@
-#imports - comment these out if running locally - required just for streamlit cloud
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+#import Streamlit App
+import streamlit as st
+
+#fix sqlite3 only on when run on Streamlit Cloud
+if "DEPLOYED_TO_CLOUD" in st.secrets and st.secrets["DEPLOYED_TO_CLOUD"] == 1:
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 #imports
 from langchain.chat_models import ChatCohere
@@ -21,46 +25,37 @@ from langchain.memory import ConversationBufferMemory
 import os
 from langchain.document_loaders import TextLoader
 from chromadb.utils import embedding_functions
-import streamlit as st
-from dotenv import load_dotenv
 
+#   Get Parameter Variables
 if "temperature" not in st.session_state:
-    st.session_state.temperature = float(st.secrets["TEMPERATURE"] or 0.75)
+    st.session_state.temperature = float(st.secrets["TEMPERATURE"] if "TEMPERATURE" in st.secrets else 0.75)
     
 if "search_k" not in st.session_state:
-    st.session_state.search_k = int(st.secrets["SEARCH_K"] or 1)
+    st.session_state.search_k = int(st.secrets["SEARCH_K"] if "SEARCH_K" in st.secrets else 1)
 
 if "chunk_size" not in st.session_state:
-    st.session_state.chunk_size = int(st.secrets["CHUNK_SIZE"] or 1000)
+    st.session_state.chunk_size = int(st.secrets["CHUNK_SIZE"] if "CHUNK_SIZE" in st.secrets else 1000 )
 
 if "max_tokens" not in st.session_state:
-    st.session_state.max_tokens = int(st.secrets["MAX_TOKENS"] or 600)
+    st.session_state.max_tokens = int(st.secrets["MAX_TOKENS"] if "MAX_TOKENS" in st.secrets else 600 )
 
 if "chunk_overlap" not in st.session_state:
-    st.session_state.chunk_overlap = float(st.secrets["CHUNK_OVERLAP"] or 0.00)
+    st.session_state.chunk_overlap = float(st.secrets["CHUNK_OVERLAP"] if "CHUNK_OVERLAP" in st.secrets else 0.00)
 
 if "chat_input" not in st.session_state:
-    st.session_state.chat_input = st.secrets["CHAT_INPUT"] or 'Tell us more about you, your dream and your ambition'
+    st.session_state.chat_input = st.secrets["CHAT_INPUT"] if "CHAT_INPUT" in st.secrets else 'Tell us more about you, your dream and your ambition'
 
 if "init_assistant_message" not in st.session_state:
-    st.session_state.init_assistant_message = st.secrets["INIT_ASSISTANCE_MESSAGE"] or "Hey, I'm Ed, your dedicated research assistant! Ready to make your university dreams happen. Where do you want to kick things off?"
+    st.session_state.init_assistant_message = st.secrets["INIT_ASSISTANCE_MESSAGE"] if "INIT_ASSISTANCE_MESSAGE" in st.secrets else "Hey, I'm Ed, your dedicated research assistant! Ready to make your university dreams happen. Where do you want to kick things off?"
 
+api_key=st.secrets["COHERE_API_KEY"] if "COHERE_API_KEY" in st.secrets else None
+if api_key == None:
+    raise Exception('Require a COHERE_API_KEY to be setup in as an environment variable')    
 
+st.title(st.secrets["TITLE"] if "TITLE" in st.secrets else 'Welcome to MatchMyUni')
 
-@st.cache_resource
+#@st.cache_resource
 def setup_chain():
-    #Get Environment Variables
-    load_dotenv()
-    api_key=st.secrets["COHERE_API_KEY"]
-    if api_key == None:
-        raise Exception('Require a COHERE_API_KEY to be setup in as an environment variable')
-    max_tokens=int(st.secrets["MAX_TOKENS"] or 600)
-    
-    
-    st.title(st.secrets["TITLE"] or 'Welcome to MatchMyUni')
-    
-    print('max_tokens',st.session_state.max_tokens,'temperature',st.session_state.temperature,'search_k',st.session_state.search_k, 'chunk_size', st.session_state.chunk_size, 'chunk_overlap', st.session_state.chunk_overlap)
-    
     #Initalize Cohere
     co = cohere.Client(api_key)
     #I put the text file into u_data folder, you can usde your path
@@ -104,7 +99,8 @@ def setup_chain():
     
     return chain
 
-chain = setup_chain()
+if "chain" not in st.session_state:
+    st.session_state.chain = setup_chain()
 
 question = ""
 
@@ -116,7 +112,8 @@ def submit_parameters():
     st.session_state.max_tokens = int(st.session_state.max_tokens_parameter)
     st.session_state.chunk_overlap = float(st.session_state.chunk_overlap_parameter)
     st.session_state.messages = []
-    st.cache_resource.clear()
+    del st.session_state["chain"]
+    #st.cache_resource.clear()
 
 with st.sidebar.form("Parameters"):
     st.slider('Temperature',0.00,1.00,st.session_state.temperature,.05, key="temperature_parameter")
@@ -148,7 +145,7 @@ response = st.session_state.init_assistant_message
 
 if question != None:
     #response = f"{list(chain(prompt).values())[1]}"
-    response = chain.run({"query": question})
+    response = st.session_state.chain.run({"query": question})
 # Display assistant response in chat message container
 with st.chat_message("assistant"):
     st.markdown(response)
