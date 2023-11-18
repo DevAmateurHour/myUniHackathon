@@ -11,5 +11,5 @@ The file should contain a single line: COHERE_API_KEY="<i><b>ENTER YOUR COHERE A
 
 To run this on Streamlit Cloud, simply add a SECRET of the same: COHERE_API_KEY="<i><b>ENTER YOUR COHERE API KEY HERE IN BETWEEN THE DOUBLE QUOTES</b></i>"
 
-If you want to update any of the Langchain and/or Cohere Default parameters, or the UI verbiage, those can be modified in the config.ini
+If you want to update any of the Langchain and/or Cohere Default parameters, or the UI verbiage, those can be modified in the config.ini file
 
