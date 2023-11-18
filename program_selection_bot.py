@@ -28,34 +28,40 @@ from langchain.memory import ConversationBufferMemory
 import os
 from langchain.document_loaders import TextLoader
 from chromadb.utils import embedding_functions
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+print(config['LANGCHAIN_COHERE']['MAX_TOKENS'])
+
 
 #   Get Parameter Variables
 if "temperature" not in st.session_state:
-    st.session_state.temperature = float(st.secrets["TEMPERATURE"] if "TEMPERATURE" in st.secrets else 0.75)
+    st.session_state.temperature = float(config['LANGCHAIN_COHERE']['TEMPERATURE'])
     
 if "search_k" not in st.session_state:
-    st.session_state.search_k = int(st.secrets["SEARCH_K"] if "SEARCH_K" in st.secrets else 1)
+    st.session_state.search_k = int(config['LANGCHAIN_COHERE']['SEARCH_K'])
 
 if "chunk_size" not in st.session_state:
-    st.session_state.chunk_size = int(st.secrets["CHUNK_SIZE"] if "CHUNK_SIZE" in st.secrets else 1000 )
+    st.session_state.chunk_size = int(config['LANGCHAIN_COHERE']['CHUNK_SIZE'] )
 
 if "max_tokens" not in st.session_state:
-    st.session_state.max_tokens = int(st.secrets["MAX_TOKENS"] if "MAX_TOKENS" in st.secrets else 600 )
+    st.session_state.max_tokens = int(config['LANGCHAIN_COHERE']['MAX_TOKENS'])
 
 if "chunk_overlap" not in st.session_state:
-    st.session_state.chunk_overlap = float(st.secrets["CHUNK_OVERLAP"] if "CHUNK_OVERLAP" in st.secrets else 0.00)
+    st.session_state.chunk_overlap = float(config['LANGCHAIN_COHERE']['CHUNK_OVERLAP'] )
 
 if "chat_input" not in st.session_state:
-    st.session_state.chat_input = st.secrets["CHAT_INPUT"] if "CHAT_INPUT" in st.secrets else 'Tell us more about you, your dream and your ambition'
+    st.session_state.chat_input = config['STREAMLIT_UI']['CHAT_INPUT'] 
 
 if "init_assistant_message" not in st.session_state:
-    st.session_state.init_assistant_message = st.secrets["INIT_ASSISTANCE_MESSAGE"] if "INIT_ASSISTANCE_MESSAGE" in st.secrets else "Hey, I'm Ed, your dedicated research assistant! Ready to make your university dreams happen. Where do you want to kick things off?"
+    st.session_state.init_assistant_message = config['STREAMLIT_UI']['INIT_ASSISTANCE_MESSAGE'] 
 
 api_key=st.secrets["COHERE_API_KEY"] if "COHERE_API_KEY" in st.secrets else None
 if api_key == None:
     raise Exception('Require a COHERE_API_KEY to be setup in as an environment variable')    
 
-st.title(st.secrets["TITLE"] if "TITLE" in st.secrets else 'Welcome to MatchMyUni')
+st.title(config['STREAMLIT_UI']['TITLE'])
 
 #@st.cache_resource
 def setup_chain():
