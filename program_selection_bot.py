@@ -1,7 +1,9 @@
-#imports
+#imports - comment these out if running locally - required just for streamlit cloud
 __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+#imports
 from langchain.chat_models import ChatCohere
 from langchain.schema import HumanMessage
 import cohere  
@@ -22,6 +24,28 @@ from chromadb.utils import embedding_functions
 import streamlit as st
 from dotenv import load_dotenv
 
+if "temperature" not in st.session_state:
+    st.session_state.temperature = float(st.secrets["TEMPERATURE"] or 0.75)
+    
+if "search_k" not in st.session_state:
+    st.session_state.search_k = int(st.secrets["SEARCH_K"] or 1)
+
+if "chunk_size" not in st.session_state:
+    st.session_state.chunk_size = int(st.secrets["CHUNK_SIZE"] or 1000)
+
+if "max_tokens" not in st.session_state:
+    st.session_state.max_tokens = int(st.secrets["MAX_TOKENS"] or 600)
+
+if "chunk_overlap" not in st.session_state:
+    st.session_state.chunk_overlap = float(st.secrets["CHUNK_OVERLAP"] or 0.00)
+
+if "chat_input" not in st.session_state:
+    st.session_state.chat_input = st.secrets["CHAT_INPUT"] or 'Tell us more about you, your dream and your ambition'
+
+if "init_assistant_message" not in st.session_state:
+    st.session_state.init_assistant_message = st.secrets["INIT_ASSISTANCE_MESSAGE"] or "Hey, I'm Ed, your dedicated research assistant! Ready to make your university dreams happen. Where do you want to kick things off?"
+
+
 
 @st.cache_resource
 def setup_chain():
@@ -32,27 +56,9 @@ def setup_chain():
         raise Exception('Require a COHERE_API_KEY to be setup in as an environment variable')
     max_tokens=int(st.secrets["MAX_TOKENS"] or 600)
     
-    if "temperature" not in st.session_state:
-        st.session_state.temperature = float(st.secrets["TEMPERATURE"] or 0.75)
     
-    if "search_k" not in st.session_state:
-        st.session_state.search_k = int(st.secrets["SEARCH_K"] or 1)
-
-    if "chunk_size" not in st.session_state:
-        st.session_state.chunk_size = int(st.secrets["CHUNK_SIZE"] or 1000)
-
-    if "max_tokens" not in st.session_state:
-        st.session_state.max_tokens = int(st.secrets["MAX_TOKENS"] or 600)
-
-    if "chunk_overlap" not in st.session_state:
-        st.session_state.chunk_overlap = float(st.secrets["CHUNK_OVERLAP"] or 0.00)
-
     st.title(st.secrets["TITLE"] or 'Welcome to MatchMyUni')
-
-    st.session_state.chat_input = st.secrets["CHAT_INPUT"] or 'Tell us more about you, your dream and your ambition'
-
-    st.session_state.init_assistant_message = st.secrets["INIT_ASSISTANCE_MESSAGE"] or "Hey, I'm Ed, your dedicated research assistant! Ready to make your university dreams happen. Where do you want to kick things off?"
-
+    
     print('max_tokens',st.session_state.max_tokens,'temperature',st.session_state.temperature,'search_k',st.session_state.search_k, 'chunk_size', st.session_state.chunk_size, 'chunk_overlap', st.session_state.chunk_overlap)
     
     #Initalize Cohere
