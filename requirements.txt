@@ -3,4 +3,3 @@ langchain
 chromadb
 cohere
 chardet
-sqlite3
