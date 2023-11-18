@@ -24,31 +24,31 @@ from dotenv import load_dotenv
 def setup_chain():
     #Get Environment Variables
     load_dotenv()
-    api_key=os.getenv('COHERE_API_KEY')
+    api_key=st.secrets["COHERE_API_KEY"]
     if api_key == None:
         raise Exception('Require a COHERE_API_KEY to be setup in as an environment variable')
-    max_tokens=int(os.getenv('MAX_TOKENS') or 600)
+    max_tokens=int(st.secrets["MAX_TOKENS"] or 600)
     
     if "temperature" not in st.session_state:
-        st.session_state.temperature = float(os.getenv('TEMPERATURE') or 0.75)
+        st.session_state.temperature = float(st.secrets["TEMPERATURE"] or 0.75)
     
     if "search_k" not in st.session_state:
-        st.session_state.search_k = int(os.getenv('SEARCH_K') or 1)
+        st.session_state.search_k = int(st.secrets["SEARCH_K"] or 1)
 
     if "chunk_size" not in st.session_state:
-        st.session_state.chunk_size = int(os.getenv('CHUNK_SIZE') or 1000)
+        st.session_state.chunk_size = int(st.secrets["CHUNK_SIZE"] or 1000)
 
     if "max_tokens" not in st.session_state:
-        st.session_state.max_tokens = int(os.getenv('MAX_TOKENS') or 600)
+        st.session_state.max_tokens = int(st.secrets["MAX_TOKENS"] or 600)
 
     if "chunk_overlap" not in st.session_state:
-        st.session_state.chunk_overlap = float(os.getenv('CHUNK_OVERLAP') or 0.00)
+        st.session_state.chunk_overlap = float(st.secrets["CHUNK_OVERLAP"] or 0.00)
 
-    st.title(os.getenv('TITLE') or 'Welcome to MatchMyUni')
+    st.title(st.secrets["TITLE"] or 'Welcome to MatchMyUni')
 
-    st.session_state.chat_input = os.getenv('CHAT_INPUT') or 'Tell us more about you, your dream and your ambition'
+    st.session_state.chat_input = st.secrets["CHAT_INPUT"] or 'Tell us more about you, your dream and your ambition'
 
-    st.session_state.init_assistant_message = os.getenv('INIT_ASSISTANCE_MESSAGE') or "Hey, I'm Ed, your dedicated research assistant! Ready to make your university dreams happen. Where do you want to kick things off?"
+    st.session_state.init_assistant_message = st.secrets["INIT_ASSISTANCE_MESSAGE"] or "Hey, I'm Ed, your dedicated research assistant! Ready to make your university dreams happen. Where do you want to kick things off?"
 
     print('max_tokens',st.session_state.max_tokens,'temperature',st.session_state.temperature,'search_k',st.session_state.search_k, 'chunk_size', st.session_state.chunk_size, 'chunk_overlap', st.session_state.chunk_overlap)
     
