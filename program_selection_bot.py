@@ -2,10 +2,13 @@
 import streamlit as st
 
 #fix sqlite3 only on when run on Streamlit Cloud
-if "DEPLOYED_TO_CLOUD" in st.secrets and st.secrets["DEPLOYED_TO_CLOUD"] == 1:
+#if "DEPLOYED_TO_CLOUD" in st.secrets and st.secrets["DEPLOYED_TO_CLOUD"] == 1:
+try:
     __import__('pysqlite3')
     import sys
     sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except:
+    print('info: did not require any changes to sqlite3 on this OS')
 
 #imports
 from langchain.chat_models import ChatCohere
