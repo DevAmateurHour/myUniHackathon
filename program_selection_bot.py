@@ -1,4 +1,7 @@
-#not all imports really needed, I have to clean
+#imports
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from langchain.chat_models import ChatCohere
 from langchain.schema import HumanMessage
 import cohere  
