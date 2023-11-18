@@ -1,5 +1,7 @@
 # myUniHackathon
 The Streamlit application, utilizes public information from University of Toronto to support students when searching for information about the different programs at the university. 
+If you want to include public information from other Universities, simply supply them as a text file into the u_data subfolder. 
+
 It utilizes Langchain, a Chroma vector database, and Cohere LLM. 
 A Cohere API Key is required.
 
