@@ -5,11 +5,15 @@ If you want to include public information from other Universities, simply supply
 It utilizes Langchain, a Chroma vector database, and Cohere LLM. 
 A Cohere API Key is required.
 
-To run this program locally, add a .streamlit subfolder, and then a secrets.toml file in that subfolder.
-
+To run this program locally as a Streamlit App, add a .streamlit subfolder, and then a secrets.toml file in that subfolder.
 The file should contain a single line: COHERE_API_KEY="<i><b>ENTER YOUR COHERE API KEY HERE IN BETWEEN THE DOUBLE QUOTES</b></i>"
+The program can be ran with the following command: streamlit run .\streamlit_chatbot_app.py
 
 To run this on Streamlit Cloud, simply add a SECRET of the same: COHERE_API_KEY="<i><b>ENTER YOUR COHERE API KEY HERE IN BETWEEN THE DOUBLE QUOTES</b></i>"
+The file to tell Stream Cloud to run is: streamlit_chatbot_app.py
+
+To run this program locally as a Terminal App, add a .env file and include the following: COHERE_API_KEY=<i><b>ENTER YOUR COHERE API KEY HERE</b></i>
+The program to run is terminal_chatbot_app.py
 
 If you want to update any of the Langchain and/or Cohere Default parameters, or the UI verbiage, those can be modified in the config.ini file
 
