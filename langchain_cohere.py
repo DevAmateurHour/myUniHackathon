@@ -20,47 +20,50 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.document_loaders import TextLoader
 
-def setup_chain(api_key, chunk_size, chunk_overlap, max_tokens, temperature, search_k, verbose):
-    #Initalize Cohere
-    co = cohere.Client(api_key)
-    #I put the text file into u_data folder, you can usde your path
-    text_loader_kwargs={'autodetect_encoding': True}
-    loader = DirectoryLoader("u_data/", silent_errors=False, show_progress=True, loader_cls=TextLoader, loader_kwargs=text_loader_kwargs)
-    docs = loader.load()
-    len(docs)
-    embeddings = CohereEmbeddings(cohere_api_key=api_key)
-    text_splitter = CharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    documents = text_splitter.split_documents(docs)
-    vectorstore = Chroma.from_documents(documents, embeddings) #db
-    index = VectorStoreIndexWrapper(vectorstore=vectorstore)
-    model =ChatCohere(model="command-nightly",max_tokens=max_tokens,temperature=temperature, cohere_api_key=api_key)
+class Chain:
 
-    template = """
-    Use the following context (delimited by <ctx></ctx>) and the chat history (delimited by <hs></hs>) to answer the question:
-    ------
-    <ctx>
-    {context}
-    </ctx>
-    ------
-    <hs>
-    {history}
-    </hs>
-    ------
-    {question}
-    Answer:
-    """
-    prompt = PromptTemplate(
-        input_variables=["history", "context", "question"],
-        template=template,
-    )
+    def __init__(self, api_key, chunk_size, chunk_overlap, max_tokens, temperature, search_k, verbose):
+        #Initalize Cohere
+        co = cohere.Client(api_key)
+        #I put the text file into u_data folder, you can usde your path
+        text_loader_kwargs={'autodetect_encoding': True}
+        loader = DirectoryLoader("u_data/", silent_errors=False, show_progress=True, loader_cls=TextLoader, loader_kwargs=text_loader_kwargs)
+        docs = loader.load()
+        len(docs)
+        embeddings = CohereEmbeddings(cohere_api_key=api_key)
+        text_splitter = CharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        documents = text_splitter.split_documents(docs)
+        vectorstore = Chroma.from_documents(documents, embeddings) #db
+        index = VectorStoreIndexWrapper(vectorstore=vectorstore)
+        model =ChatCohere(model="command-nightly",max_tokens=max_tokens,temperature=temperature, cohere_api_key=api_key)
 
-    chain = RetrievalQA.from_chain_type(llm=model, chain_type="stuff", retriever=index.vectorstore.as_retriever(search_kwargs={"k": search_k}), verbose = verbose, chain_type_kwargs={
-            "verbose": verbose,
-            "prompt": prompt,
-            "memory": ConversationBufferMemory(
-                memory_key="history",
-                input_key="question"),
-        })
-    
-    return chain
+        template = """
+        Use the following context (delimited by <ctx></ctx>) and the chat history (delimited by <hs></hs>) to answer the question:
+        ------
+        <ctx>
+        {context}
+        </ctx>
+        ------
+        <hs>
+        {history}
+        </hs>
+        ------
+        {question}
+        Answer:
+        """
+        prompt = PromptTemplate(
+            input_variables=["history", "context", "question"],
+            template=template,
+        )
 
+        self.chain = RetrievalQA.from_chain_type(llm=model, chain_type="stuff", retriever=index.vectorstore.as_retriever(search_kwargs={"k": search_k}), verbose = verbose, chain_type_kwargs={
+                "verbose": verbose,
+                "prompt": prompt,
+                "memory": ConversationBufferMemory(
+                    memory_key="history",
+                    input_key="question"),
+            })
+        
+
+    def run(self, question):
+        return self.chain.run({"query": question})

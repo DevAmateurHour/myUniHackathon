@@ -1,6 +1,6 @@
 import streamlit as st
 from helper import *
-from langchain_cohere import *
+from langchain_cohere import Chain
 
 def initialize():
     chain_parameters, ui_parameters = initialize_parameters()
@@ -62,7 +62,7 @@ def streamlit_ui():
     response = st.session_state.init_assistant_message
 
     if question != None:
-        response = st.session_state.chain.run({"query": question})
+        response = st.session_state.chain.run(question)
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
         st.markdown(response)
@@ -74,7 +74,7 @@ if "initialized" not in st.session_state:
     initialize()
 
 if "chain" not in st.session_state:
-    st.session_state.chain = setup_chain(st.session_state.api_key, st.session_state.chunk_size, 
+    st.session_state.chain = Chain(st.session_state.api_key, st.session_state.chunk_size, 
                                         st.session_state.chunk_overlap, st.session_state.max_tokens, 
                                         st.session_state.temperature, st.session_state.search_k,
                                         st.session_state.verbose)
